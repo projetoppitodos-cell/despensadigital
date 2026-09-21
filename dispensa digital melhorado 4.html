@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dispensa Digital - Login & Gestão</title>
+  <title>Despensa Digital - Login & Gestão</title>
   <style>
     :root {
       /* Fundo geral e estrutural */
@@ -252,7 +252,7 @@
   <!-- TELA DE LOGIN -->
   <div id="loginScreen">
     <div class="login-box">
-      <h1>Dispensa Digital</h1>
+      <h1>Despensa Digital</h1>
       <p>Gestão Inteligente de Cozinha Escolar</p>
       <form onsubmit="efetuarLogin(event)">
         <input type="text" id="username" class="login-input" placeholder="Usuário" style="margin-bottom: 16px;" required>
@@ -278,7 +278,7 @@
       <div class="header-container">
         <button class="menu-btn" onclick="toggleMenu()">&#8942;</button>
         <div class="header-title-box">
-          <h1 onclick="mostrarAba('inicio')">Dispensa Digital</h1>
+          <h1 onclick="mostrarAba('inicio')">Despensa Digital</h1>
           <div class="header-user">
             <span id="userInfo">👨‍🍳 Admin</span>
             <button class="btn-logout" onclick="logout()">Sair</button>
@@ -580,7 +580,7 @@
         if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
         firebase.auth().signInAnonymously().then(() => {
           firebaseAtivo = true;
-          const ref = firebase.database().ref('dispensaDigital');
+          const ref = firebase.database().ref('despensaDigital');
           ref.on('value', snapshot => {
             const dados = snapshot.val();
             if (!dados) return;
@@ -619,7 +619,7 @@
     function sincronizarBanco() {
       salvarDadosLocal();
       if (!firebaseAtivo) return;
-      firebase.database().ref('dispensaDigital').set(estadoDoBanco()).catch(err => console.warn('Firebase: erro ao sincronizar.', err));
+      firebase.database().ref('despensaDigital').set(estadoDoBanco()).catch(err => console.warn('Firebase: erro ao sincronizar.', err));
     }
 
     function carregarDados() {
