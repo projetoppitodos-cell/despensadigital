@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dispensa Digital - Login & Gestão</title>
+  <style>
+    :root {
+      /* Fundo geral e estrutural */
+      --bg-body: #F5F7F5;          
+      --card-bg: #FFFFFF;          
+      --card-inner: #FFFFFF;      
+      
+      /* Identidade Visual Principal */
+      --primary: #1B5E20;          
+      --secondary: #2E7D32;    
+      --attention: #F57C00;
+      
+      /* Textos */
+      --text-main: #263238;        
+      --text-muted: #78909C;       
+      
+      /* Bordas e Sombras */
+      --border-color: #E2E8F0;    
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08); 
+      
+      /* Status / Feedbacks */
+      --danger: #D32F2F;
+      --warning: #FBC02D;
+      --success: #66BB6A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    body { background-color: var(--bg-body); color: var(--text-main); line-height: 1.5; }
+
+    /* --- TELA DE LOGIN --- */
+    #loginScreen { display: flex; justify-content: center; align-items: center; height: 100vh; padding: 20px; }
+    .login-box { background: var(--card-bg); border: 1px solid var(--border-color); padding: 30px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: var(--shadow-md); }
+    .login-box h1 { color: var(--primary); margin-bottom: 10px; font-size: 1.8rem; }
+    .login-box p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem; }
+    .login-input-group { position: relative; margin-bottom: 16px; }
+    .login-input { width: 100%; padding: 12px; padding-right: 40px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); font-size: 1rem; }
+    .toggle-password { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px; display: flex; align-items: center; justify-content: center; }
+    .toggle-password svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .login-btn { width: 100%; background: var(--secondary); color: #ffffff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; margin-bottom: 16px; transition: background 0.2s; }
+    .login-btn:hover { background: var(--primary); }
+    .login-hint { font-size: 0.8rem; color: var(--text-main); background: rgba(251, 192, 45, 0.15); border-left: 4px solid var(--warning); padding: 10px; border-radius: 4px; text-align: left; }
+
+    /* --- APLICATIVO PRINCIPAL --- */
+    #appContainer { display: none; padding: 16px; }
+    header { background: var(--primary); border: none; border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow-md); position: relative; color: #FFFFFF; }
+    .header-container { display: flex; justify-content: space-between; align-items: center; padding: 16px; }
+    .menu-btn { background: transparent; border: none; color: #FFFFFF; font-size: 2rem; cursor: pointer; padding: 0 10px; line-height: 1; }
+    .header-title-box { text-align: center; flex-grow: 1; }
+    .header-title-box h1 { font-size: 1.4rem; color: #FFFFFF; margin-bottom: 4px; cursor: pointer;}
+    .header-user { display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); font-size: 0.9rem; }
+    .btn-logout { background: var(--attention); color: #FFFFFF; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-logout:hover { filter: brightness(1.1); }
+
+    .dropdown-menu { display: none; position: absolute; top: 70px; left: 16px; background: var(--primary); border: 1px solid var(--secondary); border-radius: 12px; box-shadow: var(--shadow-md); z-index: 100; width: 220px; overflow: hidden; }
+    .dropdown-menu.active { display: block; }
+    .dropdown-menu button { display: block; width: 100%; text-align: left; padding: 14px 16px; background: none; border: none; color: #FFFFFF; cursor: pointer; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .dropdown-menu button:last-child { border-bottom: none; }
+    .dropdown-menu button:hover { background: var(--secondary); color: #FFFFFF; }
+
+    /* ABAS SUPERIORES */
+    .tabs-container { display: flex; gap: 12px; margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; flex-wrap: wrap; }
+    .tab-pill { background: #ffffff; border: 1px solid var(--border-color); color: var(--text-muted); padding: 12px 24px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: 0.2s; }
+    .tab-pill.ativo { background: var(--primary); color: #ffffff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3); }
+
+    .controls-container { background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px; border-radius: 16px; margin-bottom: 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; max-width: 1200px; margin: 0 auto 20px; box-shadow: var(--shadow-md); }
+    .flex-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .pessoas-input { background: var(--bg-body); border: 1px solid var(--secondary); color: var(--text-main); text-align: center; width: 60px; padding: 6px; border-radius: 8px; font-weight: bold;}
+    .btn-action { background: var(--secondary); color: #FFFFFF; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;}
+    .btn-action:hover { background: var(--primary); color: #fff; }
+
+    .container { display: flex; flex-direction: column; gap: 20px; max-width: 1200px; margin: 0 auto; }
+    .section-card { background: var(--card-bg); border-radius: 16px; padding: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); }
+
+    /* DASHBOARD ELEMENTS */
+    .dash-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    .dash-card { background: var(--card-inner); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; }
+    .dash-card h3 { font-size: 1.1rem; color: var(--primary); margin-bottom: 12px; border-bottom: 2px solid var(--bg-body); padding-bottom: 6px; }
+    .dash-list { list-style: none; font-size: 0.9rem; max-height: 250px; overflow-y: auto; }
+    .dash-list li { padding: 8px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; }
+    .dash-list li:last-child { border-bottom: none; }
+    .badge-status { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+    .bg-danger { background-color: var(--danger); }
+    .bg-warning { background-color: var(--warning); color: #fff !important; }
+    .bg-success { background-color: var(--success); }
+
+    .gaveta-btn { width: 100%; background: var(--bg-body); color: var(--primary); border: 1px solid var(--border-color); padding: 14px 18px; border-radius: 12px; font-size: 1.1rem; font-weight: bold; display: flex; justify-content: space-between; cursor: pointer; }
+    .gaveta-conteudo { max-height: 0; overflow: hidden; opacity: 0; transition: 0.3s; }
+    .gaveta-conteudo.aberto { max-height: 5000px; opacity: 1; margin-top: 16px; }
+
+    .grid-alimentos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .card-alimento { border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; text-align: center; background: var(--card-inner); position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .card-alimento.esgotado { opacity: 0.7; border-color: var(--danger); background: #FFF9F9; }
+    
+    .admin-card-actions { position: absolute; top: 5px; left: 5px; right: 5px; display: flex; justify-content: space-between; z-index: 5; pointer-events: none; }
+    .admin-card-actions button { pointer-events: auto; }
+    .btn-editar-nome { background: rgba(0,0,0,0.6); color: var(--attention); border: none; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+    
+    .img-wrapper { width: 100%; height: 80px; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+    .img-alimento { width: 100%; height: 100%; object-fit: cover; }
+    .card-alimento h3 { font-size: 0.85rem; margin-bottom: 4px; font-weight: 600; color: var(--text-main); }
+    .card-alimento .info-unidade { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; }
+
+    .estoque-control { display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); padding: 4px; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); }
+    .btn-qtd { background: var(--secondary); color: #ffffff; border: none; width: 24px; height: 24px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn-qtd:hover { background: var(--primary); }
+
+    .card-receita { background: var(--card-inner); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 14px; position: relative; transition: border 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .card-receita.quase-la { border-left: 4px solid var(--warning); }
+    .card-receita.pronta { border-left: 4px solid var(--success); }
+    
+    .card-receita.favorita-borda { border: 2px solid var(--attention) !important; }
+    .card-receita.cardapio-borda { border: 2px solid var(--primary) !important; }
+
+    .receita-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; }
+    .receita-header h3 { color: var(--primary); font-size: 1.1rem; margin: 0; }
+    .receita-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    
+    .btn-icon-action { background: transparent; border: none; color: var(--border-color); cursor: pointer; transition: 0.2s; padding: 4px; display: inline-flex; align-items: center; justify-content: center; }
+    .btn-icon-action:hover { transform: scale(1.1); }
+    .btn-icon-action.ativo-cardapio { color: var(--primary); }
+    .btn-icon-action.ativo-favorito { color: var(--attention); }
+    .action-svg { width: 20px; height: 20px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .btn-remover-compra .action-svg { width: 18px; height: 18px; }
+    .file-upload .action-svg { width: 18px; height: 18px; vertical-align: middle; margin-right: 5px; }
+    .btn-action .action-svg { width: 18px; height: 18px; vertical-align: middle; margin-right: 5px; }
+    .validade-edit-icon { width: 13px; height: 13px; display: inline-block; vertical-align: -2px; margin-left: 2px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+
+    .receita-flex-container { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+    .receita-img-wrapper { width: 140px; height: 140px; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid var(--border-color); flex-shrink: 0;}
+    .receita-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    .receita-conteudo { flex: 1; min-width: 220px; }
+    .receita-conteudo ul { padding-left: 20px; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-main); }
+    .receita-conteudo ol { padding-left: 20px; font-size: 0.9rem; color: var(--text-main); }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 16px; }
+    .modal-overlay.ativo { display: flex; }
+    .modal-content { background: var(--card-bg); padding: 20px; border-radius: 16px; width: 100%; max-width: 500px; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto;}
+    .modal-content input, .modal-content select, .modal-content textarea { width: 100%; padding: 10px; margin-top: 6px; margin-bottom: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .btn-save { background: var(--secondary); color: #ffffff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+    .btn-save:hover { background: var(--primary); }
+
+    .compra-item { display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--border-color); }
+    .compra-item:last-child { border-bottom:none; }
+    .compra-item.concluido .compra-texto { text-decoration:line-through; color:var(--text-muted); }
+    .compra-check { width:18px; height:18px; cursor:pointer; flex:0 0 auto; }
+    .compra-texto { flex:1; font-size:.95rem; }
+    .btn-remover-compra { background:transparent; border:none; color:var(--danger); cursor:pointer; font-size:1.05rem; padding:4px 8px; }
+
+    /* --- ANIMAÇÕES E FEEDBACK --- */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shakeX {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+    @keyframes menuIn {
+      from { opacity: 0; transform: translateY(-8px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .shake-error { animation: shakeX .32s ease-in-out; }
+    .login-error {
+      min-height: 22px;
+      margin: -4px 0 12px;
+      color: var(--danger);
+      font-size: .88rem;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .login-error.visivel { opacity: 1; }
+    .field-error {
+      min-height: 20px;
+      margin: 4px 0 8px;
+      color: var(--danger);
+      font-size: .84rem;
+      font-weight: 700;
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .field-error.visivel { opacity: 1; transform: translateY(0); }
+    .input-error { border-color: var(--danger) !important; box-shadow: 0 0 0 2px rgba(198,40,40,.08); }
+    .modal-content.shake-error { animation: shakeX .32s ease-in-out !important; }
+    .login-box { transition: transform .25s ease, box-shadow .25s ease; animation: fadeUp .45s ease both; }
+    .dropdown-menu.active { animation: menuIn .18s ease both; }
+    .tab-pill, .btn-action, .btn-save, .btn-qtd, .btn-logout, .card-alimento, .card-receita,
+    .modal-content, .login-input, .login-btn, .gaveta-btn {
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background-color .2s ease, opacity .2s ease;
+    }
+    .tab-pill:hover, .card-alimento:hover, .card-receita:hover { transform: translateY(-2px); }
+    .btn-action:hover, .btn-save:hover, .login-btn:hover, .btn-qtd:hover, .btn-logout:hover { transform: translateY(-1px); }
+    .modal-overlay.ativo .modal-content { animation: fadeUp .22s ease both; }
+    /* Upload de imagens: ocupa uma linha inteira para não quebrar ao lado do título */
+    .modal-content label { display: block; }
+    .file-upload {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 48px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+      padding: 12px 16px;
+      border: 1.5px dashed var(--secondary);
+      background: rgba(46,125,50,.05);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      color: var(--secondary);
+      font-weight: 600;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+      transition: .2s ease;
+    }
+    .file-upload:hover { background: rgba(46,125,50,.1); transform: translateY(-1px); }
+    .file-upload:focus-within { outline: 2px solid rgba(46,125,50,.25); outline-offset: 2px; }
+    .file-upload input { display: none !important; width: 0 !important; height: 0 !important; }
+    .image-preview {
+      width: 100%;
+      max-height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-top: 8px;
+      border: 1px solid var(--border-color);
+      display: none;
+    }
+    .image-preview.visivel { display: block; animation: fadeUp .2s ease both; }
+
+  </style>
+  <!-- Banco sincronizado entre dispositivos (Firebase Realtime Database).
+       Preencha FIREBASE_CONFIG abaixo com os dados do seu projeto Firebase. -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <!-- TELA DE LOGIN -->
+  <div id="loginScreen">
+    <div class="login-box">
+      <h1>Dispensa Digital</h1>
+      <p>Gestão Inteligente de Cozinha Escolar</p>
+      <form onsubmit="efetuarLogin(event)">
+        <input type="text" id="username" class="login-input" placeholder="Usuário" style="margin-bottom: 16px;" required>
+        <div class="login-input-group">
+          <input type="password" id="password" class="login-input" placeholder="Senha" required>
+          <button type="button" class="toggle-password" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="Mostrar Senha" aria-label="Mostrar Senha"><svg id="eyeIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg></button>
+        </div>
+        <button type="submit" class="login-btn">Entrar no Sistema</button>
+        <div id="loginError" class="login-error" role="alert" aria-live="polite"></div>
+      </form>
+      <div class="login-hint">
+        <strong>Aviso de Segurança:</strong> Este é um protótipo frontend.<br><br>
+        Admin: <code>admin</code> / <code>admin123</code><br>
+        Funcionário: <code>func</code> / <code>func123</code><br>
+        Aluno: <code>aluno</code> / <code>aluno123</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- APLICATIVO PRINCIPAL -->
+  <div id="appContainer">
+    <header>
+      <div class="header-container">
+        <button class="menu-btn" onclick="toggleMenu()">&#8942;</button>
+        <div class="header-title-box">
+          <h1 onclick="mostrarAba('inicio')">Dispensa Digital</h1>
+          <div class="header-user">
+            <span id="userInfo">👨‍🍳 Admin</span>
+            <button class="btn-logout" onclick="logout()">Sair</button>
+          </div>
+        </div>
+        <div style="width: 30px;"></div>
+      </div>
+      <div class="dropdown-menu" id="sideMenu">
+        <button id="menuDashboard" onclick="mostrarAba('dashboard')"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="12" width="4" height="8"></rect><rect x="10" y="8" width="4" height="12"></rect><rect x="17" y="4" width="4" height="16"></rect></svg> Área de Serviço</button>
+        <button id="menuHistorico" onclick="mostrarAba('historico')"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16H6z"></path><path d="M9 8h6M9 12h6M9 16h4"></path></svg> Histórico</button>
+        <button onclick="mostrarAba('cardapio')"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M7 3v4M17 3v4M3 9h18"></path></svg> Cardápio do Dia</button>
+        <button id="btnMenuFavoritas" onclick="mostrarAba('favoritas')"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"></path></svg> Minhas Favoritas</button>
+        <button id="btnMenuCompras" onclick="mostrarAba('compras')"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H6"></path><circle cx="10" cy="20" r="1"></circle><circle cx="18" cy="20" r="1"></circle></svg> Lista de Compras</button>
+      </div>
+    </header>
+
+    <!-- ABAS SUPERIORES (ALIMENTOS & REFEIÇÕES VS FRUTAS & BEBIDAS) -->
+    <div class="tabs-container">
+      <button class="tab-pill ativo" id="tabBtnAlimentos" onclick="mudarSubAba('alimentos')">🍲 Alimentos & Refeições</button>
+      <button class="tab-pill" id="tabBtnFrutas" onclick="mudarSubAba('frutas')">🍹 Frutas & Bebidas</button>
+    </div>
+
+    <div class="controls-container">
+      <div class="flex-group">
+        <span>Porções (Pessoas):</span>
+        <input type="number" id="numPessoas" class="pessoas-input" value="1" min="1" oninput="atualizarPessoas(this.value)">
+      </div>
+      <div class="flex-group" id="botoesAdminGerais">
+        <button class="btn-action admin-only" id="btnAdminIngrediente" onclick="abrirModalIngrediente()">+ Novo Item</button>
+        <button class="btn-action admin-only" id="btnAdminReceita" onclick="abrirModalReceita()">+ Receita</button>
+      </div>
+    </div>
+
+    <!-- SUB-ABA ALIMENTOS & REFEIÇÕES -->
+    <div class="container" id="subAbaAlimentos">
+      <div class="section-card">
+        <button class="gaveta-btn ativa" id="gavetaToggle" onclick="toggleGaveta('gavetaConteudo', 'gavetaToggle')">
+          <span>Estoque Alimentos</span>
+          <span>▼</span>
+        </button>
+        <div class="gaveta-conteudo aberto" id="gavetaConteudo">
+          <div class="grid-alimentos" id="gridAlimentos"></div>
+        </div>
+      </div>
+      <div class="section-card">
+        <h2 style="color: var(--primary); margin-bottom: 16px; font-size: 1.2rem;">💡 Sugestões de Refeições</h2>
+        <div id="listaSugestoes"></div>
+      </div>
+    </div>
+
+    <!-- SUB-ABA FRUTAS & BEBIDAS -->
+    <div class="container" id="subAbaFrutas" style="display: none;">
+      <div class="section-card">
+        <button class="gaveta-btn ativa" id="gavetaToggleFrutas" onclick="toggleGaveta('gavetaConteudoFrutas', 'gavetaToggleFrutas')">
+          <span>Estoque Frutas</span>
+          <span>▼</span>
+        </button>
+        <div class="gaveta-conteudo aberto" id="gavetaConteudoFrutas">
+          <div class="grid-alimentos" id="gridFrutas"></div>
+        </div>
+      </div>
+      <div class="section-card">
+        <h2 style="color: var(--primary); margin-bottom: 16px; font-size: 1.2rem;">💡 Sugestões de Bebidas</h2>
+        <div id="listaSugestoesBebidas"></div>
+      </div>
+    </div>
+
+    <!-- TELA DASHBOARD (ÁREA DE SERVIÇO) -->
+    <div class="container" id="telaDashboard" style="display: none;">
+      <div class="section-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <button class="btn-action" onclick="mostrarAba('inicio')">&lt;</button>
+          <h2 style="color: var(--primary); margin: 0;">Visão Geral do Sistema</h2>
+          <div style="width: 70px;"></div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-card">
+            <h3>⚠️ Alertas de Estoque (Baixo/Esgotado)</h3>
+            <ul class="dash-list" id="listaDashEstoque"></ul>
+          </div>
+          <div class="dash-card">
+            <h3>📅 Controle de Validade</h3>
+            <ul class="dash-list" id="listaDashValidade"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TELA HISTÓRICO -->
+    <div class="container" id="telaHistorico" style="display: none;">
+      <div class="section-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <button class="btn-action" onclick="mostrarAba('inicio')">&lt;</button>
+          <h2 style="color: var(--primary); margin: 0;">📜 Histórico Recente de Ações</h2>
+          <div style="width: 70px;"></div>
+        </div>
+        <ul class="dash-list" id="listaDashHistorico" style="font-size: 0.9rem; max-height: 500px;"></ul>
+      </div>
+    </div>
+
+    <!-- TELA FAVORITAS -->
+    <div class="container" id="telaFavoritas" style="display: none;">
+      <div class="section-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <button class="btn-action" onclick="mostrarAba('inicio')">&lt;</button>
+          <h2 style="color: var(--attention); margin: 0;">⭐ Minhas Receitas Favoritas</h2>
+          <div style="width: 70px;"></div>
+        </div>
+        <div id="listaFavoritasTela"></div>
+      </div>
+    </div>
+
+    <!-- TELA CARDAPIO -->
+    <div class="container" id="telaCardapio" style="display: none;">
+      <div class="section-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <button class="btn-action" onclick="mostrarAba('inicio')">&lt;</button>
+          <h2 style="color: var(--primary); margin: 0;">📅 Cardápio do Dia</h2>
+          <button class="btn-action admin-only" id="btnEditCardapio" onclick="abrirModalEditarCardapio()"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z"></path><path d="m13.5 6.5 4 4"></path></svg> Gerenciar</button>
+        </div>
+        <div id="listaCardapioTela"></div>
+      </div>
+    </div>
+
+    <!-- TELA LISTA DE COMPRAS -->
+    <div class="container" id="telaCompras" style="display: none;">
+      <div class="section-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px;">
+          <button class="btn-action" onclick="mostrarAba('inicio')">&lt;</button>
+          <h2 style="color:var(--primary); margin:0;">🛒 Lista de Compras</h2>
+          <div style="width:70px;"></div>
+        </div>
+        <div class="compras-add" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+          <input id="novoItemCompra" type="text" placeholder="Ex.: Arroz, 10 kg" style="flex:1; min-width:220px; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-body); color:var(--text-main);" onkeydown="if(event.key==='Enter') adicionarItemCompra()">
+          <button class="btn-action" onclick="adicionarItemCompra()">+ Adicionar</button>
+        </div>
+        <ul class="dash-list" id="listaComprasTela" style="max-height:none;"></ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAIS -->
+  <div class="modal-overlay" id="modalIngrediente">
+    <div class="modal-content">
+      <h2 id="modalIngredienteTitulo" style="color: var(--primary); margin-bottom: 12px;">Novo Item</h2>
+      <label>Nome:</label> <input type="text" id="novoIngNome" oninput="limparErroCampo('novoIngNome', 'erroNovoIngNome')">
+      <div id="erroNovoIngNome" class="field-error" role="alert"></div>
+      <div style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+          <label>Qtd Inicial:</label> <input type="number" step="0.1" id="novoIngQtd" value="5">
+        </div>
+        <div style="flex: 1;">
+          <label>Unidade:</label>
+          <select id="novoIngUnidade">
+            <option value="un">Unidade (un)</option>
+            <option value="kg">Quilograma (kg)</option>
+            <option value="g">Grama (g)</option>
+            <option value="L">Litro (L)</option>
+            <option value="ml">Mililitro (ml)</option>
+          </select>
+        </div>
+      </div>
+      <label>Validade:</label> <input type="date" id="novoIngValidade" oninput="limparErroCampo('novoIngValidade', 'erroNovoIngValidade')">
+      <div id="erroNovoIngValidade" class="field-error" role="alert"></div>
+      <label>Imagem do item:</label>
+      <label class="file-upload">
+        <svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h4l1.5-2h5L16 5h4v15H4V5Z"></path><circle cx="12" cy="12" r="3"></circle></svg> Escolher imagem salva no computador
+        <input type="file" id="novoIngImgFile" accept="image/*" onchange="previsualizarImagem(this, 'novoIngImgPreview', 'ingrediente')">
+      </label>
+      <div id="erroNovoIngImg" class="field-error" role="alert"></div>
+      <img id="novoIngImgPreview" class="image-preview" alt="Pré-visualização da imagem">
+      <div class="modal-actions">
+        <button onclick="fecharModais()" style="background:transparent; color: var(--text-muted); border:none; cursor:pointer;">Cancelar</button>
+        <button class="btn-save" onclick="salvarIngrediente()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR VALIDADE -->
+  <div class="modal-overlay" id="modalValidade">
+    <div class="modal-content">
+      <h2 style="color: var(--primary); margin-bottom: 12px;">📅 Editar Validade</h2>
+      <p id="labelValidadeItem" style="font-weight: bold; margin-bottom: 8px; color: var(--text-main);"></p>
+      <label>Nova Data de Validade:</label> 
+      <input type="date" id="inputNovaValidade">
+      <div class="modal-actions" style="margin-top: 15px;">
+        <button onclick="fecharModais()" style="background:transparent; color: var(--text-muted); border:none; cursor:pointer;">Cancelar</button>
+        <button class="btn-save" onclick="salvarNovaValidade()">Salvar Validade</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalReceita">
+    <div class="modal-content">
+      <h2 id="modalReceitaTitulo" style="color: var(--primary); margin-bottom: 12px;">Nova Receita</h2>
+      <label>Nome:</label> <input type="text" id="novaRecNome" oninput="limparErroCampo('novaRecNome', 'erroNovaRecNome')">
+      <div id="erroNovaRecNome" class="field-error" role="alert"></div>
+      <label>Passos (um por linha):</label> <textarea id="novaRecPassos" oninput="limparErroCampo('novaRecPassos', 'erroNovaRecPassos')"></textarea>
+      <div id="erroNovaRecPassos" class="field-error" role="alert"></div>
+      <label>Imagem da receita:</label>
+      <label class="file-upload">
+        <svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m4 17 5-5 3 3 2-2 6 6"></path></svg> Escolher imagem salva no computador
+        <input type="file" id="novaRecImgFile" accept="image/*" onchange="previsualizarImagem(this, 'novaRecImgPreview', 'receita')">
+      </label>
+      <div id="erroNovaRecImg" class="field-error" role="alert"></div>
+      <img id="novaRecImgPreview" class="image-preview" alt="Pré-visualização da receita">
+      <div class="modal-actions">
+        <button onclick="fecharModais()" style="background:transparent; color: var(--text-muted); border:none; cursor:pointer;">Cancelar</button>
+        <button class="btn-save" onclick="salvarReceita()">Salvar Receita</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalEditarCardapio">
+    <div class="modal-content">
+      <h2 style="color: var(--primary); margin-bottom: 12px;">✏️ Editar Cardápio</h2>
+      <div id="listaEdicaoCardapio" style="max-height: 250px; overflow-y: auto; background: var(--bg-body); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);"></div>
+      <div class="modal-actions" style="margin-top: 15px; justify-content: space-between;">
+        <button onclick="limparCardapio()" style="background:transparent; color:var(--danger); border:none; cursor:pointer;"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"></path></svg> Limpar Tudo</button>
+        <div>
+          <button onclick="fecharModais()" style="background:transparent; color: var(--text-muted); border:none; cursor:pointer; margin-right: 8px;">Cancelar</button>
+          <button class="btn-save" onclick="salvarCardapioEditado()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let cargoAtual = sessionStorage.getItem('logado_cargo') || ''; 
+    let usuarioNome = sessionStorage.getItem('logado_nome') || '';
+    let qtdPessoas = 1;
+    let abaAtiva = 'inicio'; 
+    let subAbaAtiva = 'alimentos';
+    const hojePadrao = '2026-08-14';
+
+    let editingIngredienteId = null;
+    let editingValidadeId = null;
+    let editingValidadeIsFruta = false;
+    let imagemIngredienteSelecionada = '';
+    let imagemReceitaSelecionada = '';
+
+    let alimentos = [
+      { id: 'ovo', nome: 'Ovo', qtd: 12, unidade: 'un', validade: '2026-08-20', img: 'https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=300' },
+      { id: 'queijo', nome: 'Queijo Muçarela', qtd: 2, unidade: 'kg', validade: '2026-08-15', img: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=300' },
+      { id: 'arroz', nome: 'Arroz Branco', qtd: 10, unidade: 'kg', validade: '2027-01-10', img: 'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=300' },
+      { id: 'alho', nome: 'Alho', qtd: 0.5, unidade: 'kg', validade: '2026-09-01', img: 'https://images.unsplash.com/photo-154018426945-6cf22a6b2383?w=300' },
+      { id: 'manteiga', nome: 'Manteiga', qtd: 1, unidade: 'kg', validade: '2026-08-12', img: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=300' }, 
+      { id: 'bacon', nome: 'Bacon', qtd: 0, unidade: 'kg', validade: '2026-10-10', img: 'https://images.unsplash.com/photo-1606851094655-b2593a9af63f?w=300' }, 
+      { id: 'massa', nome: 'Macarrão', qtd: 5, unidade: 'kg', validade: '2027-05-05', img: 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=300' },
+      { id: 'frango', nome: 'Peito de Frango', qtd: 4, unidade: 'kg', validade: '2026-08-16', img: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=300' },
+      { id: 'cebola', nome: 'Cebola', qtd: 2, unidade: 'kg', validade: '2026-09-05', img: 'https://images.unsplash.com/photo-1508747703725-719777637510?w=300' },
+      { id: 'creme_leite', nome: 'Creme de Leite', qtd: 10, unidade: 'un', validade: '2026-12-01', img: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=300' },
+      { id: 'azeite', nome: 'Azeite', qtd: 2, unidade: 'L', validade: '2028-01-01', img: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300' }
+    ];
+
+    let frutas = [
+      { id: 'limao', nome: 'Limão', qtd: 20, unidade: 'un', validade: '2026-08-25', img: 'https://images.unsplash.com/photo-1590502593749-42b1009ce03b?w=300' },
+      { id: 'morango', nome: 'Morango', qtd: 1, unidade: 'kg', validade: '2026-08-15', img: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=300' },
+      { id: 'acucar', nome: 'Açúcar', qtd: 5, unidade: 'kg', validade: '2028-10-10', img: 'https://images.unsplash.com/photo-1581441363689-1f3c3c614cb0?w=300' },
+      { id: 'gelo', nome: 'Gelo', qtd: 10, unidade: 'kg', validade: '2027-01-01', img: 'https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=300' },
+      { id: 'leite_cond', nome: 'Leite Condensado', qtd: 8, unidade: 'un', validade: '2027-06-06', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300' }
+    ];
+
+    let receitas = [
+      { nome: 'Macarrão à Carbonara Rápido', baseQuantidades: [{ id: 'massa', qtd: 0.1, un: 'kg' }, { id: 'bacon', qtd: 0.05, un: 'kg' }, { id: 'ovo', qtd: 1, un: 'un' }, { id: 'queijo', qtd: 0.05, un: 'kg' }], passos: ['Cozinhe a massa.', 'Frite o bacon.', 'Misture ovos e queijo e incorpore na massa quente.'], img: 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400' },
+      { nome: 'Frango Acebolado Cremoso', baseQuantidades: [{ id: 'frango', qtd: 0.15, un: 'kg' }, { id: 'cebola', qtd: 0.05, un: 'kg' }, { id: 'creme_leite', qtd: 0.5, un: 'un' }, { id: 'azeite', qtd: 0.01, un: 'L' }], passos: ['Doure o frango e a cebola no azeite.', 'Adicione o creme de leite.', 'Sirva quente.'], img: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400' }
+    ];
+
+    let bebidas = [
+      { nome: 'Limonada Suíça', baseQuantidades: [{ id: 'limao', qtd: 1, un: 'un' }, { id: 'leite_cond', qtd: 0.2, un: 'un' }, { id: 'gelo', qtd: 0.1, un: 'kg' }], passos: ['Bata os limões com água e gelo.', 'Coe e bata com leite condensado.', 'Sirva gelado.'], img: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400' },
+      { nome: 'Suco de Morango', baseQuantidades: [{ id: 'morango', qtd: 0.1, un: 'kg' }, { id: 'acucar', qtd: 0.02, un: 'kg' }, { id: 'gelo', qtd: 0.1, un: 'kg' }], passos: ['Lave os morangos.', 'Bata com água, açúcar e gelo.'], img: 'https://images.unsplash.com/photo-1638176066666-ffb2f013c70e?w=400' }
+    ];
+
+    let favoritos = new Set(['Limonada Suíça']);
+    let cardapio = []; 
+    let historico = [];
+    let listaCompras = [];
+
+    // Configure estes valores com o projeto Firebase que será usado pelo site.
+    const FIREBASE_CONFIG = {
+      apiKey: '',
+      authDomain: '',
+      databaseURL: '',
+      projectId: '',
+      storageBucket: '',
+      messagingSenderId: '',
+      appId: ''
+    };
+    let firebaseAtivo = false;
+    let sincronizacaoIniciada = false;
+
+    function iniciarBancoSincronizado() {
+      if (sincronizacaoIniciada) return;
+      sincronizacaoIniciada = true;
+      const configurado = Object.values(FIREBASE_CONFIG).every(v => String(v || '').trim() !== '');
+      if (!configurado || typeof firebase === 'undefined') return;
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+        firebase.auth().signInAnonymously().then(() => {
+          firebaseAtivo = true;
+          const ref = firebase.database().ref('dispensaDigital');
+          ref.on('value', snapshot => {
+            const dados = snapshot.val();
+            if (!dados) return;
+            if (Array.isArray(dados.alimentos)) alimentos = dados.alimentos;
+            if (Array.isArray(dados.frutas)) frutas = dados.frutas;
+            if (Array.isArray(dados.receitas)) receitas = dados.receitas;
+            if (Array.isArray(dados.bebidas)) bebidas = dados.bebidas;
+            if (Array.isArray(dados.favoritos)) favoritos = new Set(dados.favoritos);
+            if (Array.isArray(dados.cardapio)) cardapio = dados.cardapio;
+            if (Array.isArray(dados.historico)) historico = dados.historico;
+            if (Array.isArray(dados.listaCompras)) listaCompras = dados.listaCompras;
+            salvarDadosLocal();
+            renderizarTudo();
+          });
+        }).catch(err => console.warn('Firebase: não foi possível conectar.', err));
+      } catch (err) {
+        console.warn('Firebase: configuração inválida.', err);
+      }
+    }
+
+    function estadoDoBanco() {
+      return { alimentos, frutas, receitas, bebidas, favoritos: Array.from(favoritos), cardapio, historico, listaCompras };
+    }
+
+    function salvarDadosLocal() {
+      localStorage.setItem('db_alimentos', JSON.stringify(alimentos));
+      localStorage.setItem('db_frutas', JSON.stringify(frutas));
+      localStorage.setItem('db_receitas', JSON.stringify(receitas));
+      localStorage.setItem('db_bebidas', JSON.stringify(bebidas));
+      localStorage.setItem('db_favoritos', JSON.stringify(Array.from(favoritos)));
+      localStorage.setItem('db_cardapio', JSON.stringify(cardapio));
+      localStorage.setItem('db_historico', JSON.stringify(historico));
+      localStorage.setItem('db_lista_compras', JSON.stringify(listaCompras));
+    }
+
+    function sincronizarBanco() {
+      salvarDadosLocal();
+      if (!firebaseAtivo) return;
+      firebase.database().ref('dispensaDigital').set(estadoDoBanco()).catch(err => console.warn('Firebase: erro ao sincronizar.', err));
+    }
+
+    function carregarDados() {
+      const dbAlimentos = localStorage.getItem('db_alimentos');
+      if(dbAlimentos) alimentos = JSON.parse(dbAlimentos);
+      
+      const dbFrutas = localStorage.getItem('db_frutas');
+      if(dbFrutas) frutas = JSON.parse(dbFrutas);
+      
+      const dbFavoritos = localStorage.getItem('db_favoritos');
+      if(dbFavoritos) favoritos = new Set(JSON.parse(dbFavoritos));
+      
+      const dbCardapio = localStorage.getItem('db_cardapio');
+      if(dbCardapio) cardapio = JSON.parse(dbCardapio);
+
+      const dbHistorico = localStorage.getItem('db_historico');
+      if(dbHistorico) historico = JSON.parse(dbHistorico);
+      const dbReceitas = localStorage.getItem('db_receitas');
+      if(dbReceitas) receitas = JSON.parse(dbReceitas);
+      const dbBebidas = localStorage.getItem('db_bebidas');
+      if(dbBebidas) bebidas = JSON.parse(dbBebidas);
+      const dbListaCompras = localStorage.getItem('db_lista_compras');
+      if(dbListaCompras) listaCompras = JSON.parse(dbListaCompras);
+    }
+
+    function salvarDados() {
+      sincronizarBanco();
+    }
+
+    function logAcao(acao) {
+      const dataHora = new Date().toLocaleString('pt-BR');
+      historico.unshift({ data: dataHora, usuario: usuarioNome, acao: acao });
+      if (historico.length > 50) historico.pop();
+      salvarDados();
+      renderizarDashboard();
+    }
+
+    window.onload = () => {
+      carregarDados();
+      iniciarBancoSincronizado();
+      window.addEventListener('storage', () => { carregarDados(); renderizarTudo(); });
+      if (cargoAtual) {
+        document.getElementById('userInfo').innerText = usuarioNome;
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        aplicarPermissoes();
+        renderizarTudo();
+      }
+    };
+
+    function togglePasswordVisibility() {
+      const senhaInput = document.getElementById('password');
+      const eyeIcon = document.getElementById('eyeIcon');
+      const eyeButton = document.getElementById('togglePasswordBtn');
+      if (!senhaInput || !eyeIcon) return;
+
+      if (senhaInput.type === 'password') {
+        senhaInput.type = 'text';
+        eyeIcon.innerHTML = '<path d="M3 3l18 18"></path><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18.7 18.7 0 0 1-3.2 3.8"></path><path d="M6.1 6.1C3.5 8.1 2 12 2 12s3.5 7 10 7a10.8 10.8 0 0 0 3.9-.7"></path>';
+        if (eyeButton) { eyeButton.title = 'Ocultar Senha'; eyeButton.setAttribute('aria-label', 'Ocultar Senha'); }
+      } else {
+        senhaInput.type = 'password';
+        eyeIcon.innerHTML = '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.5"></circle>';
+        if (eyeButton) { eyeButton.title = 'Mostrar Senha'; eyeButton.setAttribute('aria-label', 'Mostrar Senha'); }
+      }
+    }
+
+    function mostrarErroLogin(mensagem) {
+      const box = document.querySelector('.login-box');
+      const erro = document.getElementById('loginError');
+      erro.textContent = mensagem;
+      erro.classList.remove('visivel');
+      void erro.offsetWidth;
+      erro.classList.add('visivel');
+      box.classList.remove('shake-error');
+      void box.offsetWidth;
+      box.classList.add('shake-error');
+    }
+
+    function efetuarLogin(event) {
+      event.preventDefault();
+      const u = document.getElementById('username').value.trim().toLowerCase();
+      const p = document.getElementById('password').value.trim();
+      const usuarios = {
+        admin: 'admin123',
+        func: 'func123',
+        aluno: 'aluno123'
+      };
+
+      if (!Object.prototype.hasOwnProperty.call(usuarios, u)) {
+        mostrarErroLogin('nome de usuário errado');
+        return;
+      }
+      if (usuarios[u] !== p) {
+        mostrarErroLogin('senha invalida');
+        return;
+      }
+
+      document.getElementById('loginError').classList.remove('visivel');
+      cargoAtual = (u === 'admin') ? 'admin' : (u === 'func' ? 'funcionario' : 'aluno');
+      usuarioNome = (cargoAtual === 'admin') ? '👨‍🍳 Admin' : (cargoAtual === 'funcionario' ? '🧑‍🍳 Funcionário' : '🎓 Aluno');
+
+      sessionStorage.setItem('logado_cargo', cargoAtual);
+      sessionStorage.setItem('logado_nome', usuarioNome);
+
+      document.getElementById('userInfo').innerText = usuarioNome;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+
+      logAcao('Fez login no sistema.');
+      aplicarPermissoes();
+      renderizarTudo();
+    }
+
+    function logout() {
+      logAcao('Saiu do sistema.');
+      sessionStorage.clear();
+      cargoAtual = '';
+      document.getElementById('appContainer').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('password').value = '';
+      document.getElementById('password').type = 'password';
+      const eyeIconLogout = document.getElementById('eyeIcon');
+      const eyeBtnLogout = document.getElementById('togglePasswordBtn');
+      if (eyeIconLogout) eyeIconLogout.innerHTML = '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path><circle cx="12" cy="12" r="2.5"></circle>';
+      if (eyeBtnLogout) { eyeBtnLogout.title = 'Mostrar Senha'; eyeBtnLogout.setAttribute('aria-label', 'Mostrar Senha'); }
+    }
+
+    function aplicarPermissoes() {
+      document.querySelectorAll('.admin-only').forEach(el => el.style.display = (cargoAtual === 'admin') ? 'inline-block' : 'none');
+      
+      // Esconde o menu de favoritos, dashboard e histórico para o aluno
+      if (cargoAtual === 'aluno') {
+        document.getElementById('btnMenuFavoritas').style.display = 'none';
+        document.getElementById('menuDashboard').style.display = 'none';
+        document.getElementById('menuHistorico').style.display = 'none';
+        document.getElementById('btnMenuCompras').style.display = 'none';
+      } else {
+        document.getElementById('btnMenuFavoritas').style.display = 'block';
+        document.getElementById('menuDashboard').style.display = 'block';
+        document.getElementById('menuHistorico').style.display = 'block';
+        document.getElementById('btnMenuCompras').style.display = 'block';
+      }
+    }
+
+    function mostrarAba(aba) {
+      // Bloqueia o acesso direto do aluno caso tente forçar via código/URL
+      if (cargoAtual === 'aluno' && (aba === 'dashboard' || aba === 'historico' || aba === 'favoritas' || aba === 'compras')) {
+        return;
+      }
+
+      abaAtiva = aba;
+      document.getElementById('subAbaAlimentos').style.display = (aba === 'inicio' && subAbaAtiva === 'alimentos') ? 'block' : 'none';
+      document.getElementById('subAbaFrutas').style.display = (aba === 'inicio' && subAbaAtiva === 'frutas') ? 'block' : 'none';
+      document.querySelector('.tabs-container').style.display = (aba === 'inicio') ? 'flex' : 'none';
+      document.querySelector('.controls-container').style.display = (aba === 'inicio') ? 'flex' : 'none';
+
+      document.getElementById('telaDashboard').style.display = (aba === 'dashboard') ? 'block' : 'none';
+      document.getElementById('telaHistorico').style.display = (aba === 'historico') ? 'block' : 'none';
+      document.getElementById('telaFavoritas').style.display = (aba === 'favoritas') ? 'block' : 'none';
+      document.getElementById('telaCardapio').style.display = (aba === 'cardapio') ? 'block' : 'none';
+      document.getElementById('telaCompras').style.display = (aba === 'compras') ? 'block' : 'none';
+
+      if (aba === 'compras' && cargoAtual === 'aluno') return;
+
+      fecharMenu();
+      renderizarTudo();
+    }
+
+    function mudarSubAba(sub) {
+      subAbaAtiva = sub;
+      document.getElementById('tabBtnAlimentos').classList.toggle('ativo', sub === 'alimentos');
+      document.getElementById('tabBtnFrutas').classList.toggle('ativo', sub === 'frutas');
+      document.getElementById('subAbaAlimentos').style.display = (sub === 'alimentos') ? 'block' : 'none';
+      document.getElementById('subAbaFrutas').style.display = (sub === 'frutas') ? 'block' : 'none';
+    }
+
+    function toggleMenu(event) {
+      if (event) event.stopPropagation();
+      document.getElementById('sideMenu').classList.toggle('active');
+    }
+    function fecharMenu() { document.getElementById('sideMenu').classList.remove('active'); }
+
+    document.addEventListener('click', (event) => {
+      const menu = document.getElementById('sideMenu');
+      const botao = document.querySelector('.menu-btn');
+      if (menu && menu.classList.contains('active') && !menu.contains(event.target) && !botao.contains(event.target)) {
+        fecharMenu();
+      }
+    });
+    function toggleGaveta(idC, idT) { document.getElementById(idC).classList.toggle('aberto'); }
+    function atualizarPessoas(val) { qtdPessoas = Math.max(1, parseInt(val) || 1); renderizarTudo(); }
+
+    function calcularDiasDiferenca(dataAlvo) {
+      const data1 = new Date(hojePadrao);
+      const data2 = new Date(dataAlvo);
+      const diffTime = data2 - data1;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    function analisarEstoqueItem(item) {
+      const dias = calcularDiasDiferenca(item.validade);
+      const isVencido = dias < 0;
+      const isVencendo = dias >= 0 && dias <= 3;
+      const isEsgotado = item.qtd <= 0;
+      const isBaixo = item.qtd > 0 && item.qtd <= 2;
+      return { isVencido, isVencendo, isEsgotado, isBaixo, dias };
+    }
+
+    function alterarQtd(id, delta, isFruta) {
+      if (cargoAtual === 'aluno') return;
+      const lista = isFruta ? frutas : alimentos;
+      const item = lista.find(x => x.id === id);
+      if (item) {
+        const velhaQtd = item.qtd;
+        item.qtd = Math.max(0, item.qtd + delta);
+        item.qtd = Math.round(item.qtd * 100) / 100;
+        if (velhaQtd !== item.qtd) {
+          logAcao(`Alterou estoque de ${item.nome} (${velhaQtd} -> ${item.qtd} ${item.unidade})`);
+        }
+        renderizarTudo();
+      }
+    }
+
+    function renderizarTudo() {
+      renderizarDashboard();
+      renderizarHistorico();
+      renderizarGradeEstoque('gridAlimentos', alimentos, false);
+      renderizarGradeEstoque('gridFrutas', frutas, true);
+      renderizarInteligenciaReceitas('listaSugestoes', receitas, false);
+      renderizarInteligenciaReceitas('listaSugestoesBebidas', bebidas, true);
+      renderizarFavoritas();
+      renderizarCardapio();
+      renderizarListaCompras();
+    }
+
+    function renderizarDashboard() {
+      const dashEstoque = document.getElementById('listaDashEstoque');
+      const dashValidade = document.getElementById('listaDashValidade');
+      if(!dashEstoque || !dashValidade) return;
+      
+      dashEstoque.innerHTML = '';
+      dashValidade.innerHTML = '';
+
+      const todosItens = [...alimentos, ...frutas];
+      
+      todosItens.forEach(item => {
+        const st = analisarEstoqueItem(item);
+        if (st.isEsgotado) dashEstoque.innerHTML += `<li><span>${item.nome}</span> <span class="badge-status bg-danger">Esgotado</span></li>`;
+        else if (st.isBaixo) dashEstoque.innerHTML += `<li><span>${item.nome} (${item.qtd} ${item.unidade})</span> <span class="badge-status bg-warning">Baixo</span></li>`;
+
+        if (st.isVencido) dashValidade.innerHTML += `<li><span>${item.nome}</span> <span class="badge-status bg-danger">Vencido</span></li>`;
+        else if (st.isVencendo) dashValidade.innerHTML += `<li><span>${item.nome}</span> <span class="badge-status bg-warning">Vence em ${st.dias}d</span></li>`;
+      });
+
+      if(dashEstoque.innerHTML === '') dashEstoque.innerHTML = '<li><span style="color:var(--text-muted)">Estoque saudável.</span></li>';
+      if(dashValidade.innerHTML === '') dashValidade.innerHTML = '<li><span style="color:var(--text-muted)">Nenhum item vencendo.</span></li>';
+    }
+
+    function renderizarHistorico() {
+      const dashHist = document.getElementById('listaDashHistorico');
+      if(!dashHist) return;
+      dashHist.innerHTML = '';
+      historico.forEach(h => {
+        dashHist.innerHTML += `<li><div style="display:flex; flex-direction:column;"><strong>${h.usuario}</strong><span style="color:var(--text-muted); font-size:0.75rem;">${h.data}</span></div> <span>${h.acao}</span></li>`;
+      });
+      if(historico.length === 0) dashHist.innerHTML = '<li>Nenhuma ação recente.</li>';
+    }
+
+    function renderizarGradeEstoque(containerId, lista, isFruta) {
+      const grid = document.getElementById(containerId);
+      if(!grid) return;
+      grid.innerHTML = '';
+
+      lista.forEach(item => {
+        const st = analisarEstoqueItem(item);
+        const card = document.createElement('div');
+        card.className = `card-alimento ${st.isEsgotado ? 'esgotado' : ''}`;
+        
+        let validadeHTML = `<div style="font-size: 0.7rem; margin-top: 4px; font-weight: bold; color: var(--success); cursor:pointer;" onclick="abrirModalValidade('${item.id}', ${isFruta})" title="Clique para editar validade">Val: ${item.validade} <svg class="validade-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z"></path><path d="m13.5 6.5 4 4"></path></svg></div>`;
+        if (st.isVencido) validadeHTML = `<div style="font-size: 0.7rem; margin-top: 4px; font-weight: bold; color: var(--danger); cursor:pointer;" onclick="abrirModalValidade('${item.id}', ${isFruta})" title="Clique para editar validade">Vencido <svg class="validade-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z"></path><path d="m13.5 6.5 4 4"></path></svg></div>`;
+        else if (st.isVencendo) validadeHTML = `<div style="font-size: 0.7rem; margin-top: 4px; font-weight: bold; color: var(--warning); cursor:pointer;" onclick="abrirModalValidade('${item.id}', ${isFruta})" title="Clique para editar validade">Vence logo <svg class="validade-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z"></path><path d="m13.5 6.5 4 4"></path></svg></div>`;
+
+        let acoesAdmin = '';
+        if (cargoAtual === 'admin') {
+          acoesAdmin = `
+            <div class="admin-card-actions">
+              <button class="btn-editar-nome" onclick="abrirModalEditarIngrediente('${item.id}', ${isFruta})" title="Editar"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.8 4.8L8 20l11-11-4-4L4 16Z"></path><path d="m13.5 6.5 4 4"></path></svg></button>
+            </div>`;
+        }
+
+        let controleEstoque = '';
+        if (cargoAtual !== 'aluno') {
+          const step = (item.unidade === 'kg' || item.unidade === 'L') ? 0.1 : 1;
+          controleEstoque = `
+            <div class="estoque-control">
+              <button class="btn-qtd" onclick="alterarQtd('${item.id}', -${step}, ${isFruta})">-</button>
+              <span style="font-size: 0.85rem; font-weight:bold; color:var(--text-main);">${item.qtd} ${item.unidade}</span>
+              <button class="btn-qtd" onclick="alterarQtd('${item.id}', ${step}, ${isFruta})">+</button>
+            </div>`;
+        } else {
+          controleEstoque = `<div class="info-unidade" style="margin-top:10px; font-weight:bold;">Estoque: ${item.qtd} ${item.unidade}</div>`;
+        }
+
+        card.innerHTML = `
+          ${acoesAdmin}
+          <div class="img-wrapper"><img src="${item.img}" class="img-alimento" alt="${item.nome}"></div>
+          <h3>${item.nome}</h3>
+          ${validadeHTML}
+          ${controleEstoque}
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderizarInteligenciaReceitas(containerId, listaRec, isBebida) {
+      const container = document.getElementById(containerId);
+      if(!container) return;
+      container.innerHTML = '';
+      const listaEstoque = isBebida ? frutas : alimentos;
+
+      let htmlProntas = '';
+      let htmlQuase = '';
+
+      listaRec.forEach(rec => {
+        let faltantes = 0;
+        let htmlIngredientes = '';
+
+        rec.baseQuantidades.forEach(req => {
+          const itemStk = listaEstoque.find(x => x.id === req.id);
+          const qtdNecessaria = req.qtd * qtdPessoas;
+          const temSuficiente = itemStk && itemStk.qtd >= qtdNecessaria;
+          
+          if (!temSuficiente) faltantes++;
+
+          const cor = temSuficiente ? 'var(--text-main)' : 'var(--danger)';
+          const icone = temSuficiente ? '✔️' : '❌';
+          const nomeExibir = itemStk ? itemStk.nome : req.id;
+          const qtdDisp = itemStk ? itemStk.qtd : 0;
+
+          htmlIngredientes += `<li style="color: ${cor}">${icone} ${qtdNecessaria.toFixed(2)} ${req.un} - ${nomeExibir} <span style="font-size:0.75rem; color:var(--text-muted);">(Disp: ${qtdDisp})</span></li>`;
+        });
+
+        if (faltantes > 2) return;
+
+        const isFavorita = favoritos.has(rec.nome);
+        const isNoCardapio = cardapio.some(c => c.nome === rec.nome && c.isBebida === isBebida);
+
+        let classesBorda = faltantes === 0 ? 'pronta' : 'quase-la';
+        if (isFavorita) classesBorda += ' favorita-borda';
+        if (isNoCardapio) classesBorda += ' cardapio-borda';
+
+        const tagStatus = faltantes === 0 ? `<span class="badge-status bg-success">Pronta para Fazer</span>` : `<span class="badge-status bg-warning">Faltam ${faltantes} itens</span>`;
+
+        let cardHtml = `
+          <div class="card-receita ${classesBorda}">
+            <div class="receita-flex-container">
+              <div class="receita-img-wrapper"><img src="${rec.img}" alt="${rec.nome}"></div>
+              <div class="receita-conteudo">
+                <div class="receita-header">
+                  <div><h3>${rec.nome}</h3><div style="margin-top:4px;">${tagStatus}</div></div>
+                  ${gerarAcoesReceita(rec, isBebida)}
+                </div>
+                <p style="font-weight:bold; margin-bottom:6px; font-size:0.9rem; color:var(--text-main);">Para ${qtdPessoas} pessoa(s):</p>
+                <ul>${htmlIngredientes}</ul>
+                <p style="font-weight:bold; margin-bottom:6px; font-size:0.9rem; color:var(--text-main);">Preparo:</p>
+                <ol>${rec.passos.map(p => `<li>${p}</li>`).join('')}</ol>
+              </div>
+            </div>
+          </div>
+        `;
+
+        if (faltantes === 0) htmlProntas += cardHtml; else htmlQuase += cardHtml;
+      });
+
+      if(htmlProntas) container.innerHTML += `<h4 style="color:var(--success); margin-bottom:10px;">Possíveis de Fazer</h4>` + htmlProntas;
+      if(htmlQuase) container.innerHTML += `<h4 style="color:var(--warning); margin:20px 0 10px;">Quase Possíveis</h4>` + htmlQuase;
+      if(!htmlProntas && !htmlQuase) container.innerHTML = '<p style="color:var(--text-muted);">Estoque insuficiente para sugerir pratos para essa quantidade de pessoas.</p>';
+    }
+
+    function gerarAcoesReceita(rec, isBebida) {
+      if (cargoAtual === 'aluno') return '';
+      const isFavorita = favoritos.has(rec.nome);
+      const isNoCardapio = cardapio.some(c => c.nome === rec.nome && c.isBebida === isBebida);
+      
+      return `
+        <div class="receita-actions">
+          <button class="btn-icon-action ${isNoCardapio ? 'ativo-cardapio' : ''}" onclick="toggleCardapio('${rec.nome}', ${isBebida})" title="Cardápio"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M7 3v4M17 3v4M3 9h18"></path></svg></button>
+          <button class="btn-icon-action ${isFavorita ? 'ativo-favorito' : ''}" onclick="toggleFavorito('${rec.nome}')" title="Favoritar"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"></path></svg></button>
+        </div>`;
+    }
+
+    function toggleFavorito(nome) {
+      if (cargoAtual === 'aluno') return;
+      if (favoritos.has(nome)) favoritos.delete(nome); else favoritos.add(nome);
+      salvarDados(); renderizarTudo();
+    }
+
+    function toggleCardapio(nome, isBebida) {
+      if (cargoAtual === 'aluno') return;
+      const idx = cardapio.findIndex(c => c.nome === nome && c.isBebida === isBebida);
+      if (idx > -1) { cardapio.splice(idx, 1); logAcao(`Removeu ${nome} do cardápio`); }
+      else { cardapio.push({ nome, isBebida }); logAcao(`Adicionou ${nome} ao cardápio`); }
+      salvarDados(); renderizarTudo();
+    }
+
+    function renderizarFavoritas() {
+      if(cargoAtual === 'aluno' || abaAtiva !== 'favoritas') return;
+      const container = document.getElementById('listaFavoritasTela');
+      if(!container) return;
+      container.innerHTML = '';
+      
+      let html = '';
+      receitas.forEach(r => { if(favoritos.has(r.nome)) html += renderCardSimples(r, false); });
+      bebidas.forEach(r => { if(favoritos.has(r.nome)) html += renderCardSimples(r, true); });
+
+      container.innerHTML = html || '<p>Nenhuma receita favoritada.</p>';
+    }
+
+    function renderizarCardapio() {
+      if(abaAtiva !== 'cardapio') return;
+      const container = document.getElementById('listaCardapioTela');
+      if(!container) return;
+      container.innerHTML = '';
+      
+      if(cardapio.length === 0) { container.innerHTML = '<p>Cardápio vazio.</p>'; return; }
+
+      let html = '';
+      cardapio.forEach(c => {
+        const lista = c.isBebida ? bebidas : receitas;
+        const rec = lista.find(r => r.nome === c.nome);
+        if(rec) html += renderCardSimples(rec, c.isBebida);
+      });
+      container.innerHTML = html;
+    }
+
+    function renderCardSimples(rec, isBebida) {
+      const isFavorita = favoritos.has(rec.nome);
+      const isNoCardapio = cardapio.some(c => c.nome === rec.nome && c.isBebida === isBebida);
+
+      let classesBorda = 'card-receita';
+      if (isFavorita) classesBorda += ' favorita-borda';
+      if (isNoCardapio) classesBorda += ' cardapio-borda';
+
+      return `
+        <div class="${classesBorda}">
+          <div class="receita-flex-container">
+            <div class="receita-img-wrapper"><img src="${rec.img}"></div>
+            <div class="receita-conteudo">
+              <div class="receita-header">
+                <h3>${rec.nome}</h3>
+                ${gerarAcoesReceita(rec, isBebida)}
+              </div>
+              <ol style="margin-top:10px;">${rec.passos.map(p=>`<li>${p}</li>`).join('')}</ol>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function abrirModalValidade(id, isFruta) {
+      if (cargoAtual === 'aluno') return;
+      editingValidadeId = id;
+      editingValidadeIsFruta = isFruta;
+      const item = (isFruta ? frutas : alimentos).find(x => x.id === id);
+      if(item) {
+        document.getElementById('labelValidadeItem').innerText = `Item: ${item.nome} (Atual: ${item.validade})`;
+        document.getElementById('inputNovaValidade').value = item.validade;
+        document.getElementById('modalValidade').classList.add('ativo');
+      }
+    }
+
+    function salvarNovaValidade() {
+      const novaData = document.getElementById('inputNovaValidade').value;
+      if(!novaData) return alert('Selecione uma data válida.');
+      
+      const lista = editingValidadeIsFruta ? frutas : alimentos;
+      const item = lista.find(x => x.id === editingValidadeId);
+      if(item) {
+        const antiga = item.validade;
+        item.validade = novaData;
+        logAcao(`Atualizou validade de ${item.nome} (${antiga} -> ${novaData})`);
+        salvarDados();
+        renderizarTudo();
+      }
+      fecharModais();
+    }
+
+    function abrirModalIngrediente() {
+      editingIngredienteId = null;
+      document.getElementById('modalIngredienteTitulo').innerText = 'Novo Item de Estoque';
+      document.getElementById('novoIngNome').value = '';
+      document.getElementById('novoIngQtd').value = '1';
+      document.getElementById('novoIngValidade').value = hojePadrao;
+      document.getElementById('novoIngUnidade').value = 'un';
+      document.getElementById('novoIngImgFile').value = '';
+      imagemIngredienteSelecionada = '';
+      limparPreviewImagem('novoIngImgPreview');
+      document.getElementById('novoIngNome').dataset.isfruta = 'false';
+      document.getElementById('modalIngrediente').classList.add('ativo');
+    }
+
+    function abrirModalEditarIngrediente(id, isFruta) {
+      editingIngredienteId = id;
+      const item = (isFruta ? frutas : alimentos).find(x => x.id === id);
+      document.getElementById('modalIngredienteTitulo').innerText = 'Editar Item';
+      document.getElementById('novoIngNome').value = item.nome;
+      document.getElementById('novoIngQtd').value = item.qtd;
+      document.getElementById('novoIngUnidade').value = item.unidade;
+      document.getElementById('novoIngValidade').value = item.validade;
+      document.getElementById('novoIngImgFile').value = '';
+      imagemIngredienteSelecionada = item.img || '';
+      mostrarPreviewImagem('novoIngImgPreview', imagemIngredienteSelecionada);
+      limparTodosErrosFormulario('modalIngrediente');
+      document.getElementById('novoIngNome').dataset.isfruta = isFruta;
+      document.getElementById('modalIngrediente').classList.add('ativo');
+    }
+
+    function salvarIngrediente() {
+      const nome = document.getElementById('novoIngNome').value.trim();
+      const qtd = parseFloat(document.getElementById('novoIngQtd').value) || 0;
+      const unidade = document.getElementById('novoIngUnidade').value;
+      const validade = document.getElementById('novoIngValidade').value;
+      let img = imagemIngredienteSelecionada || 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=300';
+      
+      const isFruta = document.getElementById('novoIngNome').dataset.isfruta === 'true';
+      const lista = isFruta ? frutas : alimentos;
+
+      let valido = true;
+      limparTodosErrosFormulario('modalIngrediente');
+      if (!nome) {
+        mostrarErroCampo('novoIngNome', 'erroNovoIngNome', 'Informe o nome do item.');
+        valido = false;
+      }
+      if (!validade) {
+        mostrarErroCampo('novoIngValidade', 'erroNovoIngValidade', 'Informe a validade do item.');
+        valido = false;
+      }
+      if (!imagemIngredienteSelecionada) {
+        mostrarErroCampo('novoIngImgFile', 'erroNovoIngImg', 'Informe a imagem do item.');
+        valido = false;
+      }
+      if (!valido) {
+        const modal = document.querySelector('#modalIngrediente .modal-content');
+        modal.classList.remove('shake-error');
+        void modal.offsetWidth;
+        modal.classList.add('shake-error');
+        return;
+      }
+
+      if(editingIngredienteId) {
+        const item = lista.find(x => x.id === editingIngredienteId);
+        item.nome = nome; item.qtd = qtd; item.unidade = unidade; item.validade = validade; item.img = img;
+        logAcao(`Editou o ingrediente ${nome}`);
+      } else {
+        const id = nome.toLowerCase().replace(/\s+/g, '_') + '_' + Date.now();
+        lista.push({ id, nome, qtd, unidade, validade, img });
+        logAcao(`Cadastrou novo ingrediente: ${nome}`);
+      }
+      
+      salvarDados();
+      renderizarTudo();
+      fecharModais();
+    }
+
+    function abrirModalReceita() {
+      document.getElementById('novaRecNome').value = '';
+      document.getElementById('novaRecPassos').value = '';
+      document.getElementById('novaRecImgFile').value = '';
+      imagemReceitaSelecionada = '';
+      limparPreviewImagem('novaRecImgPreview');
+      limparTodosErrosFormulario('modalReceita');
+      document.getElementById('modalReceita').classList.add('ativo');
+    }
+
+    function salvarReceita() {
+      const nome = document.getElementById('novaRecNome').value.trim();
+      const passos = document.getElementById('novaRecPassos').value
+        .split('\n').map(p => p.trim()).filter(Boolean);
+
+      let valido = true;
+      limparTodosErrosFormulario('modalReceita');
+      if (!nome) {
+        mostrarErroCampo('novaRecNome', 'erroNovaRecNome', 'Informe o nome da receita.');
+        valido = false;
+      }
+      if (!passos.length) {
+        mostrarErroCampo('novaRecPassos', 'erroNovaRecPassos', 'Informe pelo menos um passo da receita.');
+        valido = false;
+      }
+      if (!imagemReceitaSelecionada) {
+        mostrarErroCampo('novaRecImgFile', 'erroNovaRecImg', 'Informe a imagem da receita.');
+        valido = false;
+      }
+      if (!valido) {
+        const modal = document.querySelector('#modalReceita .modal-content');
+        modal.classList.remove('shake-error');
+        void modal.offsetWidth;
+        modal.classList.add('shake-error');
+        return;
+      }
+
+      const img = imagemReceitaSelecionada || 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400';
+      const receita = {
+        nome,
+        baseQuantidades: [],
+        passos,
+        img
+      };
+      receitas.push(receita);
+      logAcao(`Cadastrou nova receita: ${nome}`);
+      salvarDados();
+      renderizarTudo();
+      fecharModais();
+    }
+
+    function mostrarErroCampo(inputId, erroId, mensagem) {
+      const input = document.getElementById(inputId);
+      const erro = document.getElementById(erroId);
+      if (input) input.classList.add('input-error');
+      if (erro) {
+        erro.textContent = mensagem;
+        erro.classList.add('visivel');
+      }
+    }
+
+    function limparErroCampo(inputId, erroId) {
+      const input = document.getElementById(inputId);
+      const erro = document.getElementById(erroId);
+      if (input) input.classList.remove('input-error');
+      if (erro) {
+        erro.textContent = '';
+        erro.classList.remove('visivel');
+      }
+    }
+
+    function limparTodosErrosFormulario(modalId) {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.querySelectorAll('.field-error').forEach(e => { e.textContent = ''; e.classList.remove('visivel'); });
+      modal.querySelectorAll('.input-error').forEach(e => e.classList.remove('input-error'));
+      const content = modal.querySelector('.modal-content');
+      if (content) content.classList.remove('shake-error');
+    }
+
+    function mostrarPreviewImagem(previewId, src) {
+      const preview = document.getElementById(previewId);
+      if (!preview) return;
+      if (src) {
+        preview.src = src;
+        preview.classList.add('visivel');
+      } else {
+        preview.removeAttribute('src');
+        preview.classList.remove('visivel');
+      }
+    }
+
+    function limparPreviewImagem(previewId) {
+      mostrarPreviewImagem(previewId, '');
+    }
+
+    function previsualizarImagem(input, previewId, tipo) {
+      const arquivo = input.files && input.files[0];
+      const erroId = tipo === 'ingrediente' ? 'erroNovoIngImg' : 'erroNovaRecImg';
+      if (!arquivo) return;
+      if (!arquivo.type.startsWith('image/')) {
+        input.value = '';
+        if (tipo === 'ingrediente') imagemIngredienteSelecionada = '';
+        else imagemReceitaSelecionada = '';
+        mostrarErroCampo(input.id, erroId, tipo === 'ingrediente' ? 'Selecione uma imagem válida para o item.' : 'Selecione uma imagem válida para a receita.');
+        return;
+      }
+      limparErroCampo(input.id, erroId);
+      const leitor = new FileReader();
+      leitor.onload = (e) => {
+        if (tipo === 'ingrediente') imagemIngredienteSelecionada = e.target.result;
+        else imagemReceitaSelecionada = e.target.result;
+        mostrarPreviewImagem(previewId, e.target.result);
+      };
+      leitor.readAsDataURL(arquivo);
+    }
+
+    function abrirModalEditarCardapio() {
+      const container = document.getElementById('listaEdicaoCardapio');
+      if(!container) return;
+      container.innerHTML = '<h4 style="margin-bottom:8px; color:var(--primary);">Refeições</h4>';
+      receitas.forEach(rec => {
+        const checked = cardapio.some(c => c.nome === rec.nome && !c.isBebida) ? 'checked' : '';
+        container.innerHTML += `<label style="display:block; margin-bottom:6px;"><input type="checkbox" value="${rec.nome}" data-isbebida="false" class="chk-edit-cardapio" ${checked}> ${rec.nome}</label>`;
+      });
+      container.innerHTML += '<h4 style="margin-top:16px; margin-bottom:8px; color:var(--primary);">Bebidas</h4>';
+      bebidas.forEach(rec => {
+        const checked = cardapio.some(c => c.nome === rec.nome && c.isBebida) ? 'checked' : '';
+        container.innerHTML += `<label style="display:block; margin-bottom:6px;"><input type="checkbox" value="${rec.nome}" data-isbebida="true" class="chk-edit-cardapio" ${checked}> ${rec.nome}</label>`;
+      });
+      document.getElementById('modalEditarCardapio').classList.add('ativo');
+    }
+
+    function salvarCardapioEditado() {
+      cardapio = [];
+      document.querySelectorAll('.chk-edit-cardapio:checked').forEach(chk => {
+        cardapio.push({ nome: chk.value, isBebida: chk.dataset.isbebida === 'true' });
+      });
+      logAcao('Atualizou o cardápio do dia');
+      salvarDados();
+      renderizarTudo();
+      fecharModais();
+    }
+
+    function limparCardapio() {
+      cardapio = [];
+      logAcao('Limpou o cardápio do dia');
+      salvarDados();
+      renderizarTudo();
+      fecharModais();
+    }
+
+    function renderizarListaCompras() {
+      const container = document.getElementById('listaComprasTela');
+      if (!container || cargoAtual === 'aluno') return;
+      container.innerHTML = '';
+      if (!listaCompras.length) {
+        container.innerHTML = '<li><span style="color:var(--text-muted)">Nenhum item na lista de compras.</span></li>';
+        return;
+      }
+      listaCompras.forEach(item => {
+        const li = document.createElement('li');
+        li.className = `compra-item ${item.concluido ? 'concluido' : ''}`;
+        li.innerHTML = `
+          <input class="compra-check" type="checkbox" ${item.concluido ? 'checked' : ''} onchange="alternarCompra('${item.id}')">
+          <span class="compra-texto"></span>
+          <button class="btn-remover-compra" onclick="removerItemCompra('${item.id}')" title="Remover"><svg class="action-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"></path></svg></button>`;
+        li.querySelector('.compra-texto').textContent = item.texto;
+        container.appendChild(li);
+      });
+    }
+
+    function adicionarItemCompra() {
+      if (cargoAtual === 'aluno') return;
+      const input = document.getElementById('novoItemCompra');
+      const texto = input.value.trim();
+      if (!texto) return;
+      listaCompras.push({ id: 'compra_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), texto, concluido: false });
+      input.value = '';
+      logAcao(`Adicionou item à lista de compras: ${texto}`);
+      salvarDados();
+      renderizarListaCompras();
+    }
+
+    function alternarCompra(id) {
+      if (cargoAtual === 'aluno') return;
+      const item = listaCompras.find(x => x.id === id);
+      if (!item) return;
+      item.concluido = !item.concluido;
+      salvarDados();
+      renderizarListaCompras();
+    }
+
+    function removerItemCompra(id) {
+      if (cargoAtual === 'aluno') return;
+      const item = listaCompras.find(x => x.id === id);
+      if (!item) return;
+      listaCompras = listaCompras.filter(x => x.id !== id);
+      logAcao(`Removeu item da lista de compras: ${item.texto}`);
+      salvarDados();
+      renderizarListaCompras();
+    }
+
+    function fecharModais() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('ativo'));
+    }
+  </script>
+</body>
+</html>
